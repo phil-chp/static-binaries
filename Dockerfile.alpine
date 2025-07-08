@@ -1,0 +1,15 @@
+FROM alpine AS builder
+
+ARG BIN_NAME
+WORKDIR /src
+COPY ${BIN_NAME}/deps.txt /deps.txt
+RUN xargs apk add --no-cache < /deps.txt
+RUN mkdir -p /out
+
+COPY ${BIN_NAME}/build.sh /build.sh
+RUN chmod +x /build.sh && /build.sh
+
+FROM scratch
+ARG BIN_NAME
+COPY --from=builder "/out/${BIN_NAME}" "/${BIN_NAME}"
+ENTRYPOINT ["/${BIN_NAME}"]

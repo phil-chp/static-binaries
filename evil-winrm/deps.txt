@@ -1,0 +1,10 @@
+git
+ruby
+ruby-dev
+build-essential
+libffi-dev
+libreadline-dev
+libyaml-dev
+zlib1g-dev
+libxml2-dev
+libxslt-dev
