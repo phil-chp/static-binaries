@@ -2,6 +2,11 @@
 
 set -eu
 
+SUDO_DOCKER=""
+if [ $(test -r /var/run/docker.sock; echo "$?") -ne 0 ]; then
+    SUDO_DOCKER="sudo"
+fi
+
 validate_bin_name() {
   case "$1" in
     *[!a-zA-Z0-9._-]* | "" ) return 1 ;;
@@ -30,11 +35,11 @@ build_target() {
   IMAGE_NAME="static-builder"
   CONTAINER_NAME="tmp_$BIN_NAME"
 
-  docker build --build-arg BIN_NAME="$BIN_NAME" \
+  $SUDO_DOCKER docker build --build-arg BIN_NAME="$BIN_NAME" \
       --build-context target="./$BIN_NAME" -t "$IMAGE_NAME" .
-  docker create --name "$CONTAINER_NAME" "$IMAGE_NAME" >/dev/null
-  docker cp "$CONTAINER_NAME:/$BIN_NAME" "./binaries/$BIN_NAME"
-  docker rm "$CONTAINER_NAME" >/dev/null
+  $SUDO_DOCKER docker create --name "$CONTAINER_NAME" "$IMAGE_NAME" >/dev/null
+  $SUDO_DOCKER docker cp "$CONTAINER_NAME:/$BIN_NAME" "./binaries/$BIN_NAME"
+  $SUDO_DOCKER docker rm "$CONTAINER_NAME" >/dev/null
   
   chmod +x "./binaries/$BIN_NAME"
   printf '\nFinished building %s\n' "$BIN_NAME"
