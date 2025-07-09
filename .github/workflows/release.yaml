@@ -45,7 +45,8 @@ jobs:
 
       - name: Build all assets
         run: |
-          echo "Hey !\nI'm a placeholder !" > ./i-am-not-a-built-binary
+          echo "Hey !" > ./i-am-not-a-built-binary
+          echo "I'm a placeholder !" >> ./i-am-not-a-built-binary
 
       - name: Create Release
         uses: ncipollo/release-action@v1
