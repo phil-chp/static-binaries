@@ -1,0 +1,60 @@
+##############
+#
+#     @
+#       @
+#   @ @ @
+#
+##############
+
+# create a workflow for the releases branch.
+# this workflow will create a release on each new push, using the content of ".version" as tag (v{content of .version}), and the commit message as core of the release
+# i couldn't make the build work on my local machine (arch), so i'll leave it empty (will just create a "i-am-not-a-built-binary" file and use that as releases assets)
+
+name: Build release
+
+on:
+  push:
+    branches:
+      - releases
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Install and cache any action dependencies
+        uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          # add here any package that must be installed on the HOST machine before starting to build the binaries (git is placeholder)
+          packages: git
+          version: 1.0
+
+        # expect a .version file on the root of the releases branch, modified when pushing a new release
+      - name: Retreive version number
+        id: version
+        run: |
+          echo "VERSION=$(cat .version | tr -d '\n')" >> "$GITHUB_OUTPUT"
+
+      - name: Build all assets
+        run: |
+          echo "Hey !" > ./i-am-not-a-built-binary
+          echo "I'm a placeholder !" >> ./i-am-not-a-built-binary
+
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          title: ${{ steps.version.outputs.VERSION }}
+          tag: v${{ steps.version.outputs.VERSION }}
+          body: |
+            ## v${{ steps.version.outputs.VERSION }}
+            ${{ github.event.head_commit.message }}
+          # insert here all the files you want included when making a release. for example ./nmap or ./nmap-${{ steps.version.outputs.VERSION }} if the name contains the current version
+          artifacts: ./i-am-not-a-built-binary

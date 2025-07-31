@@ -1,0 +1,10 @@
+build-base
+git
+linux-headers
+libpcap-dev
+openssl-dev
+libssh2-dev
+lua-dev
+autoconf
+automake
+libtool
